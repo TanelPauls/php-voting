@@ -20,7 +20,7 @@ $result = mysqli_query($mysqli, "SELECT * FROM KUSIMUSED");
 		<div class="dropdown">
 			<select size="10">
 				<?php while ($row = mysqli_fetch_assoc($result)): ?>
-					<option value="<?= htmlspecialchars($row['id']) ?>">
+					<option value="<?= htmlspecialchars($row['Kusimus_id']) ?>">
 						<?= htmlspecialchars($row['Kusimus']) ?>
 					</option>
 				<?php endwhile; ?>

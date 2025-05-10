@@ -32,7 +32,7 @@ DROP TABLE IF EXISTS TULEMUSED;
 ";
 
 if (!$mysqli->query($sql)) {
-    error_log("Error deleting table: TULEMUS." . $mysqli->error);
+    error_log("Error deleting table: TULEMUSED." . $mysqli->error);
 }
 
 
@@ -49,7 +49,7 @@ $sql = "
 CREATE TABLE IF NOT EXISTS KUSIMUSED (
     Kusimus_id INT AUTO_INCREMENT PRIMARY KEY,
     Kusimus VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-    H_alguse_aeg DATETIME NOT NULL
+    H_alguse_aeg DATETIME
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 ";
 
@@ -120,11 +120,26 @@ if (!$mysqli->query($sql)) {
 
 $sql = "
 INSERT INTO KUSIMUSED (Kusimus) VALUES
-('Kas peaks seda veebilehte edasi arendama?');
+('Kas peaks seda veebilehte edasi arendama?'),
+('Kas tuleks disaini muuta?'),
+('Kas kasutajate registreerimine peaks olema kohustuslik?'),
+('Kas tuleks lisada öörežiim?'),
+('Kas peaks lubama anonüümseid kommentaare?'),
+('Kas e-posti teavitused peaks olema vaikimisi sees?'),
+('Kas lisada statistika leht?'),
+('Kas teha veebileht ka mobiilisõbralikumaks?'),
+('Kas lubada rohkem kui üks vastus per küsimus?'),
+('Kas peaks lisama kasutajate profiilid?'),
+('Kas muuta menüü hierarhiat lihtsamaks?'),
+('Kas lisada otsingufunktsioon?'),
+('Kas peaks lisama kontaktivormi?'),
+('Kas võimaldada sisselogimine sotsiaalmeedia kaudu?'),
+('Kas peaks tõstma turvalisust kahefaktorilise autentimisega?');
 ";
 
 if (!$mysqli->query($sql)) {
     error_log("Error inserting to table KUSIMUSED: " . $mysqli->error);
 }
+
 
 ?>
