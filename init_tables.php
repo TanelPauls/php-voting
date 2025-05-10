@@ -2,11 +2,27 @@
 require_once 'config.php';
 
 $sql = "
-DROP TABLE IF EXISTS KUSIMUSED;
+DROP TABLE IF EXISTS LOGI;
 ";
 
 if (!$mysqli->query($sql)) {
-    error_log("Error deleting table: KUSIMUSED." . $mysqli->error);
+    error_log("Error deleting table: LOGI." . $mysqli->error);
+}
+
+$sql = "
+DROP TABLE IF EXISTS HAALETUS;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error deleting table: HAALETUS." . $mysqli->error);
+}
+
+$sql = "
+DROP TABLE IF EXISTS TULEMUSED;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error deleting table: TULEMUSED." . $mysqli->error);
 }
 
 $sql = "
@@ -17,32 +33,16 @@ if (!$mysqli->query($sql)) {
     error_log("Error deleting table: HAALETAJAD." . $mysqli->error);
 }
 
-
 $sql = "
-DROP TABLE IF EXISTS HAALETUS;
+DROP TABLE IF EXISTS KUSIMUSED;
 ";
 
 if (!$mysqli->query($sql)) {
-    error_log("Error deleting table: HAALETUS." . $mysqli->error);
+    error_log("Error deleting table: KUSIMUSED." . $mysqli->error);
 }
 
 
-$sql = "
-DROP TABLE IF EXISTS TULEMUSED;
-";
 
-if (!$mysqli->query($sql)) {
-    error_log("Error deleting table: TULEMUSED." . $mysqli->error);
-}
-
-
-$sql = "
-DROP TABLE IF EXISTS LOGI;
-";
-
-if (!$mysqli->query($sql)) {
-    error_log("Error deleting table: LOGI." . $mysqli->error);
-}
 
 
 $sql = "
