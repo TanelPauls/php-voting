@@ -2,28 +2,28 @@
 require_once 'config.php';
 
 $sql = "
-DROP TABLE KUSIMUSED;
+DROP TABLE IF EXISTS KUSIMUSED;
 ";
 
 if (!$mysqli->query($sql)) {
     error_log("Error creating KUSIMUSED table: " . $mysqli->error);
 }
 $sql = "
-DROP TABLE HAALETUS;
+DROP TABLE IF EXISTS HAALETUS;
 ";
 
 if (!$mysqli->query($sql)) {
     error_log("Error creating HAALETUS table: " . $mysqli->error);
 }
 $sql = "
-DROP TABLE TULEMUSED;
+DROP TABLE IF EXISTS TULEMUSED;
 ";
 
 if (!$mysqli->query($sql)) {
     error_log("Error creating TULEMUSED table: " . $mysqli->error);
 }
 $sql = "
-DROP TABLE LOGI;
+DROP TABLE IF EXISTS LOGI;
 ";
 
 if (!$mysqli->query($sql)) {
