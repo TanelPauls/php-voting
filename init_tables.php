@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS KUSIMUSED (
 ";
 
 if (!$mysqli->query($sql)) {
-    error_log("Error creating KUSIMUS table: " . $mysqli->error);
+    error_log("Error creating KUSIMUSED table: " . $mysqli->error);
 }
 
 $sql = "
@@ -79,6 +79,16 @@ CREATE TABLE IF NOT EXISTS LOGI (
 
 if (!$mysqli->query($sql)) {
     error_log("Error creating LOGI table: " . $mysqli->error);
+}
+
+
+$sql = "
+INSERT INTO KUSIMUSED (Kusimus) VALUES
+('Kas peaks seda veebilehte edasi arendama?');
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error inserting to table KUSIMUSED: " . $mysqli->error);
 }
 
 ?>
