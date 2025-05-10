@@ -1,0 +1,15 @@
+// put this script outside public_html
+
+// cd into public folder where repo is...
+
+// in github add webhook
+// PayloadURL: 
+// https://vepso.ita.voco.ee/php-voting/webhook.php?secret=secret-token
+
+// Content type:
+// application/json
+
+
+#!/bin/bash
+cd /home/username/public_html/repofolder
+git pull origin main
