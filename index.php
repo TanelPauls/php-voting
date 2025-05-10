@@ -6,35 +6,26 @@ $result = mysqli_query($mysqli, "SELECT * FROM KUSIMUSED");
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>MariaDB VALIMISED</title>
+	<title>VALIMISED</title>
 	<link rel="stylesheet" href="styles.css" />
-	<style>
-		.dropdown {
-			width: 300px;
-			max-height: 220px; /* approximately 10 options depending on font size */
-			overflow-y: auto;
-			border: 1px solid #ccc;
-			padding: 5px;
-			font-size: 16px;
-		}
-		select {
-			width: 100%;
-			font-size: 16px;
-			padding: 5px;
-		}
-	</style>
+	<link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
 </head>
 <body>
-	<h1>Küsimused</h1>
+    <h1>VALIMISED !</h1>
 
-	<div class="dropdown">
-		<select size="10"> <!-- visible options without opening dropdown -->
-			<?php while ($row = mysqli_fetch_assoc($result)): ?>
-				<option value="<?= htmlspecialchars($row['id']) ?>">
-					<?= htmlspecialchars($row['Kusimus']) ?>
-				</option>
-			<?php endwhile; ?>
-		</select>
+    <div class="container">
+		<div class="dropdown">
+			<select size="10">
+				<?php while ($row = mysqli_fetch_assoc($result)): ?>
+					<option value="<?= htmlspecialchars($row['id']) ?>">
+						<?= htmlspecialchars($row['Kusimus']) ?>
+					</option>
+				<?php endwhile; ?>
+			</select>
+		</div>
 	</div>
 </body>
 </html>
