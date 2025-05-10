@@ -140,6 +140,4 @@ INSERT INTO KUSIMUSED (Kusimus) VALUES
 if (!$mysqli->query($sql)) {
     error_log("Error inserting to table KUSIMUSED: " . $mysqli->error);
 }
-
-
 ?>
