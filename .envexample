@@ -2,3 +2,4 @@ DB_HOST=0.0.0.0
 CPANEL_USER=username
 CPANEL_PASS=password
 DB_NAME=db_name
+WEBHOOK_SECRET=github-secret-token
