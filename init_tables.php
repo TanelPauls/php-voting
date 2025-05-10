@@ -2,6 +2,46 @@
 require_once 'config.php';
 
 $sql = "
+DROP TABLE KUSIMUSED;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error creating KUSIMUSED table: " . $mysqli->error);
+}
+$sql = "
+DROP TABLE HAALETUS;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error creating HAALETUS table: " . $mysqli->error);
+}
+$sql = "
+DROP TABLE TULEMUSED;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error creating TULEMUSED table: " . $mysqli->error);
+}
+$sql = "
+DROP TABLE LOGI;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error creating LOGI table: " . $mysqli->error);
+}
+
+$sql = "
+CREATE TABLE IF NOT EXISTS KUSIMUSED (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    Kusimus VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error creating KUSIMUS table: " . $mysqli->error);
+}
+
+$sql = "
 CREATE TABLE IF NOT EXISTS HAALETUS (
     id INT AUTO_INCREMENT PRIMARY KEY,
     Eesnimi VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -40,4 +80,5 @@ CREATE TABLE IF NOT EXISTS LOGI (
 if (!$mysqli->query($sql)) {
     error_log("Error creating LOGI table: " . $mysqli->error);
 }
+
 ?>
