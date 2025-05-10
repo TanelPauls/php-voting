@@ -2,8 +2,6 @@
 // use this command to make it executable
 // chmod +x /home/youruser/git-pull.sh
 
-// cd into public folder where repo is...
-
 // in github add webhook
 // PayloadURL: 
 // https://vepso.ita.voco.ee/php-voting/webhook.php?secret=secret-token
