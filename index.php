@@ -24,8 +24,8 @@ while ($row = mysqli_fetch_assoc($result)) {
       </div>
 
       <div class="button-group">
-        <button class="guess-button">AI</button>
-        <button class="guess-button">Päris</button>
+        <button class="guess-button" onclick="submitGuess('AI')">AI</button>
+        <button class="guess-button" onclick="submitGuess('Päris')">Päris</button>
       </div>
 
       <div class="guess-info">
@@ -69,31 +69,6 @@ while ($row = mysqli_fetch_assoc($result)) {
     showImage(currentIndex);
   }
 
-  function submitGuess(choice) {
-    if (!voterName) {
-      pendingVote = choice;
-      openModal();
-      return;
-    }
-
-    sendVote(choice);
-  }
-
-  function sendVote(choice) {
-    fetch("submit_guess.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: voterName,
-        choice: choice,
-        imageIndex: currentIndex
-      })
-    })
-    .then(res => res.text())
-    .then(data => alert("Aitäh, sinu hääl on salvestatud!"))
-    .catch(err => alert("Midagi läks valesti."));
-  }
-
   function openModal() {
     document.getElementById("nameModal").style.display = "block";
   }
@@ -102,23 +77,33 @@ while ($row = mysqli_fetch_assoc($result)) {
     document.getElementById("nameModal").style.display = "none";
   }
 
-  function confirmName() {
-    const eesnimi = document.getElementById("eesnimi").value.trim();
-    const perenimi = document.getElementById("perenimi").value.trim();
-
-    if (!eesnimi || !perenimi) {
-      alert("Palun sisesta nii eesnimi kui perenimi.");
-      return;
-    }
-
-    voterName = `${eesnimi} ${perenimi}`;
-    closeModal();
-
-    if (pendingVote) {
-      sendVote(pendingVote);
-      pendingVote = null;
-    }
+  function submitGuess(choice) {
+  if (!voterName) {
+    pendingVote = choice;
+    openModal();
+    return;
   }
+
+  alert(`Valisid: ${choice} (${voterName})`);
+  }
+
+  function confirmName() {
+  const eesnimi = document.getElementById("eesnimi").value.trim();
+  const perenimi = document.getElementById("perenimi").value.trim();
+
+  if (!eesnimi || !perenimi) {
+    alert("Palun sisesta nii eesnimi kui perenimi.");
+    return;
+  }
+
+  voterName = `${eesnimi} ${perenimi}`;
+  closeModal();
+
+  if (pendingVote) {
+    alert(`Valisid: ${pendingVote} (${voterName})`);
+    pendingVote = null;
+  }
+}
 
   window.onload = function () {
     showImage(currentIndex);
