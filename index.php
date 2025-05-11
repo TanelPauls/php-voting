@@ -96,14 +96,31 @@ while ($row = mysqli_fetch_assoc($result)) {
     return;
   }
 
-  voterName = `${eesnimi} ${perenimi}`;
-  closeModal();
+  // Send to database
+  fetch("register_user.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ eesnimi, perenimi })
+  })
+  .then(res => res.text())
+  .then(response => {
+    if (response === "OK") {
+      voterName = `${eesnimi} ${perenimi}`;
+      closeModal();
 
-  if (pendingVote) {
-    alert(`Valisid: ${pendingVote} (${voterName})`);
-    pendingVote = null;
-  }
+      if (pendingVote) {
+        alert(`Valisid: ${pendingVote} (${voterName})`);
+        pendingVote = null;
+      }
+    } else {
+      alert("Viga kasutaja salvestamisel: " + response);
+    }
+  })
+  .catch(err => {
+    alert("Võrguviga kasutaja salvestamisel.");
+  });
 }
+
 
   window.onload = function () {
     showImage(currentIndex);
