@@ -1,12 +1,11 @@
 <?php
 include_once("init_tables.php");
 
-$result = mysqli_query($mysqli, "SELECT URL, H_alguse_aeg FROM PILDID");
+$result = mysqli_query($mysqli, "SELECT URL FROM PILDID");
 $images = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $images[] = [
-        'url' => $row['URL'],
-        'start_time' => $row['H_alguse_aeg']
+        'url' => $row['URL']
     ];
 }
 ?>
