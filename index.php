@@ -27,9 +27,10 @@ while ($row = mysqli_fetch_assoc($result)) {
       </div>
 
       <div class="button-group">
-        <button class="guess-button" onclick="submitGuess('AI')">AI</button>
-        <button class="guess-button" onclick="submitGuess('Päris')">Päris</button>
-      </div>
+  		<button id="ai-button" class="guess-button" onclick="submitGuess('AI')">AI</button>
+  		<button id="real-button" class="guess-button" onclick="submitGuess('Päris')">Päris</button>
+	  </div>
+
 
 	  <div class="vote-message-row" id="vote-message-row">
   		<span id="vote-message"></span>
@@ -82,6 +83,8 @@ function showImage(index) {
   if (!startTimeStr) {
     voteMessage.textContent = "Hääletus pole veel alganud.";
     startButton.style.display = "inline-block";
+	document.getElementById("ai-button").disabled = true;
+    document.getElementById("real-button").disabled = true;
     return;
   }
 
@@ -97,8 +100,13 @@ function showImage(index) {
 
   if (elapsed > 300) {
     voteMessage.textContent = "Hääletus lõppenud.";
+	document.getElementById("ai-button").disabled = true;
+    document.getElementById("real-button").disabled = true;
     return;
   }
+
+  document.getElementById("ai-button").disabled = false;
+  document.getElementById("real-button").disabled = false;
 
   voteMessage.textContent = "Hääletus käib";
   updateTimer(300 - elapsed);

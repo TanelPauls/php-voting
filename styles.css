@@ -182,3 +182,8 @@ body {
 #start-vote-btn {
   flex-shrink: 0; /* prevent shrinking */
 }
+
+.guess-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
