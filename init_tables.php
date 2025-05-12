@@ -120,8 +120,21 @@ if (!$mysqli->query($sql)) {
 
 $sql = "
 INSERT IGNORE INTO PILDID (URL, Oige_vastus) VALUES
-('https://cdn.mos.cms.futurecdn.net/44kXT82VEHfqTG6uQ9kHVh-1200-80.jpg', 'Paris_asdä'),
-('https://c8.alamy.com/comp/RC0T0N/funny-caricature-of-mona-lisa-painting-RC0T0N.jpg', 'Tommy_öäõü');
+('https://vso24pauls.ita.voco.ee/Pildid/art/01.webp', 'Vincent_Van_Gogh-Starry_Night_1889'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/02.webp', 'Vincent_van_Gogh-Madame_Roulin_and_Her_Baby_1888'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/03.webp', 'AI'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/04.webp', 'Albrech_Dürer-Stag_Beetle_1505'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/05.webp', 'Albrecht_Dürer-The_Large_Horse_1505'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/06.webp', 'AI'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/07.webp', 'Andre_Derain-Les_Voiles_rouges_1906'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/08.webp', 'AI'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/09.webp', 'Andre_Derain-Matisse_et_Terrus_1905'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/10.webp', 'AI'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/11.webp', 'Claude_Monet-Eine_Allee_in_Monets_Garten_in_Giverny_1902'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/12.webp', 'Claude_Monet-Woman_with_a_Parasol_1875'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/13.webp', 'Rembrandt_van_Rijn-Rembrandt_Self_portrait_1637'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/14.webp', 'Rembrandt_van_Rijn-The_Good_Samaritian_1630'),
+('https://vso24pauls.ita.voco.ee/Pildid/art/15.webp', 'AI');
 ";
 
 if (!$mysqli->query($sql)) {
