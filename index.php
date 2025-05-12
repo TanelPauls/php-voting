@@ -20,15 +20,17 @@ while ($row = mysqli_fetch_assoc($result)) {
   <body>
     <div class="container">
       <div class="image-wrapper">
-        <button class="nav-button left" onclick="prevImage()">⟨</button>
+        <button class="nav-button left" onclick="prevImage()">⬨</button>
         <img src="" alt="Guess if this is AI or Real" class="guess-image" />
-        <button class="nav-button right" onclick="nextImage()">⟩</button>
+        <button class="nav-button right" onclick="nextImage()">⬩</button>
       </div>
 
       <div class="button-group">
-  		<button id="ai-button" class="guess-button" onclick="submitGuess('AI')">AI</button>
-  		<button id="real-button" class="guess-button" onclick="submitGuess('Päris')">Päris</button>
-	  </div>
+        <button id="ai-button" class="guess-button" onclick="submitGuess('AI')">AI</button>
+        <button id="real-button" class="guess-button" onclick="submitGuess('Päris')">Päris</button>
+      </div>
+
+      <p id="vote-timer"></p>
 
       <div class="guess-info">
         <p>Kõik kasutajate arvamused:</p>
@@ -36,7 +38,8 @@ while ($row = mysqli_fetch_assoc($result)) {
         <p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
       </div>
     </div>
-	    <div id="nameModal" class="modal">
+
+    <div id="nameModal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <h2>Enne hääletamist sisesta oma nimi</h2>
@@ -47,8 +50,8 @@ while ($row = mysqli_fetch_assoc($result)) {
         <button onclick="confirmName()">Alusta hääletamist</button>
       </div>
     </div>
-  </body>
-  <script>
+
+    <script>
 const images = <?php echo json_encode($images); ?>;
 let currentIndex = 0;
 let voterName = "";
@@ -58,16 +61,9 @@ const imgElement = document.querySelector(".guess-image");
 
 function showImage(index) {
   clearInterval(voteCountdown);
-
-  const image = images[index];
-  imgElement.src = image.url;
-
-  // Always disable buttons by default
-  document.getElementById("ai-button").disabled = true;
-  document.getElementById("real-button").disabled = true;
+  imgElement.src = images[index].url;
   document.getElementById("vote-timer").textContent = "";
 
-  // If user is not known yet, don't request vote status
   if (!voterName) return;
 
   fetch("get_vote_status.php", {
@@ -84,14 +80,10 @@ function showImage(index) {
         elapsed = Math.max(0, elapsed);
 
         if (elapsed < 300) {
-          document.getElementById("ai-button").disabled = false;
-          document.getElementById("real-button").disabled = false;
           updateTimerUI(300 - elapsed);
         } else {
           disableVoteButtons();
         }
-      } else {
-        disableVoteButtons();
       }
     });
 }
@@ -142,7 +134,6 @@ function submitGuess(choice) {
     return;
   }
 
-  // Step 1: Check if vote already started
   fetch("get_vote_status.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -151,10 +142,8 @@ function submitGuess(choice) {
     .then(res => res.json())
     .then(data => {
       if (data.status === "started") {
-        // Already started → just submit guess
         sendGuess(choice);
       } else {
-        // Not started → start timer, then submit guess
         fetch("start_user_vote.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -182,7 +171,7 @@ function sendGuess(choice) {
     .then(response => {
       if (response === "OK") {
         alert(`Sinu hääl on salvestatud: ${choice}`);
-        showImage(currentIndex); // refresh timer
+        showImage(currentIndex);
       } else if (response === "TOO_LATE") {
         alert("Aeg selle pildi hääletamiseks on läbi.");
         showImage(currentIndex);
@@ -194,7 +183,6 @@ function sendGuess(choice) {
       alert("Võrguviga hääletamisel.");
     });
 }
-
 
 function openModal() {
   document.getElementById("nameModal").style.display = "block";
@@ -223,7 +211,7 @@ function confirmName() {
       if (response === "OK") {
         voterName = `${eesnimi} ${perenimi}`;
         closeModal();
-        showImage(currentIndex); // reload vote status
+        showImage(currentIndex);
         if (pendingVote) {
           alert(`Valisid: ${pendingVote} (${voterName})`);
           pendingVote = null;
@@ -242,6 +230,5 @@ window.onload = function () {
 };
 </script>
 
-
-
+</body>
 </html>
