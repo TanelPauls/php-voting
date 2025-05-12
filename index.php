@@ -1,10 +1,13 @@
 <?php
 include_once("init_tables.php");
 
-$result = mysqli_query($mysqli, "SELECT URL FROM PILDID");
-$imageUrls = [];
+$result = mysqli_query($mysqli, "SELECT URL, H_alguse_aeg FROM PILDID");
+$images = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $imageUrls[] = $row['URL'];
+    $images[] = [
+        'url' => $row['URL'],
+        'start_time' => $row['H_alguse_aeg']
+    ];
 }
 ?>
 <!DOCTYPE html>
@@ -28,11 +31,16 @@ while ($row = mysqli_fetch_assoc($result)) {
         <button class="guess-button" onclick="submitGuess('Päris')">Päris</button>
       </div>
 
+	  <div class="vote-status">
+  		<p id="vote-message"></p>
+  		<p id="vote-timer"></p>
+  		<button id="start-vote-btn" onclick="startVote()">Alusta</button>
+	  </div>
+
       <div class="guess-info">
-        <p>Kõik arvamused:</p>
+        <p>Kõik kasutajate arvamused:</p>
         <p>AI - 3 &nbsp;&nbsp;&nbsp; Päris - 7</p>
-        <p>Tegelikult on see pilt:</p>
-        <p class="correct-answer">Päris</p>
+        <p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
       </div>
     </div>
 	    <div id="nameModal" class="modal">
@@ -48,7 +56,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     </div>
   </body>
   <script>
-  const images = <?php echo json_encode($imageUrls); ?>;
+  const images = <?php echo json_encode($images); ?>;
   let currentIndex = 0;
   let voterName = "";
   let pendingVote = null;
@@ -86,6 +94,66 @@ while ($row = mysqli_fetch_assoc($result)) {
 
   alert(`Valisid: ${choice} (${voterName})`);
   }
+
+  function showImage(index) {
+  imgElement.src = images[index].url;
+
+  const voteMessage = document.getElementById("vote-message");
+  const voteTimer = document.getElementById("vote-timer");
+  const startButton = document.getElementById("start-vote-btn");
+
+  voteMessage.textContent = "";
+  voteTimer.textContent = "";
+  startButton.style.display = "none";
+
+  const startTimeStr = images[index].start_time;
+
+  if (!startTimeStr) {
+    voteMessage.textContent = "Hääletus pole veel alganud.";
+    startButton.style.display = "inline-block";
+    return;
+  }
+
+  const startTime = new Date(startTimeStr.replace(' ', 'T')); // Safe ISO format
+  const now = new Date();
+  const elapsed = (now - startTime) / 1000;
+
+  if (elapsed > 5 * 60) {
+    voteMessage.textContent = "Hääletus lõppenud.";
+    return;
+  }
+
+  voteMessage.textContent = "Hääletus käib";
+  updateTimer(300 - elapsed);
+}
+
+
+let voteCountdown;
+
+function updateTimer(secondsLeft) {
+  clearInterval(voteCountdown);
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const s2 = Math.floor(s % 60);
+    return `${m}:${s2.toString().padStart(2, '0')}`;
+  }
+
+  const voteTimer = document.getElementById("vote-timer");
+
+  voteCountdown = setInterval(() => {
+    if (secondsLeft <= 0) {
+      clearInterval(voteCountdown);
+      voteTimer.textContent = "Hääletus lõppenud.";
+      document.getElementById("vote-message").textContent = "Hääletus lõppenud.";
+      return;
+    }
+
+    voteTimer.textContent = "Aega jäänud: " + formatTime(secondsLeft);
+    secondsLeft--;
+  }, 1000);
+}
+
 
   function confirmName() {
   const eesnimi = document.getElementById("eesnimi").value.trim();
