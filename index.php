@@ -163,10 +163,16 @@ function submitGuess(choice) {
 }
 
 function sendGuess(choice) {
+  const dbChoice = (choice === "Päris") ? "Paris" : choice;
+
   fetch("submit_guess.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: voterName, imageIndex: currentIndex, choice })
+    body: JSON.stringify({
+      name: voterName,
+      imageIndex: currentIndex,
+      choice: dbChoice
+    })
   })
     .then(res => res.text())
     .then(response => {
@@ -213,8 +219,9 @@ function confirmName() {
         voterName = `${eesnimi} ${perenimi}`;
         closeModal();
         showImage(currentIndex);
+
         if (pendingVote) {
-          alert(`Valisid: ${pendingVote} (${voterName})`);
+          submitGuess(pendingVote);
           pendingVote = null;
         }
       } else {
@@ -225,6 +232,7 @@ function confirmName() {
       alert("Võrguviga kasutaja salvestamisel.");
     });
 }
+
 
 window.onload = function () {
   showImage(currentIndex);
