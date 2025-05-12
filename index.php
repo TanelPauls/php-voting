@@ -1,11 +1,11 @@
 <?php
 include_once("init_tables.php");
 
-$result = mysqli_query($mysqli, "SELECT URL FROM PILDID");
-$images = [];
+$result = mysqli_query($mysqli, "SELECT URL, Oige_vastus FROM PILDID");
 while ($row = mysqli_fetch_assoc($result)) {
     $images[] = [
-        'url' => $row['URL']
+        'url' => $row['URL'],
+        'correct' => $row['Oige_vastus']
     ];
 }
 ?>
@@ -20,9 +20,9 @@ while ($row = mysqli_fetch_assoc($result)) {
   <body>
     <div class="container">
       <div class="image-wrapper">
-        <button class="nav-button left" onclick="prevImage()">⯈</button>
+        <button class="nav-button left" onclick="prevImage()">></button>
         <img src="" alt="Guess if this is AI or Real" class="guess-image" />
-        <button class="nav-button right" onclick="nextImage()">⯉</button>
+        <button class="nav-button right" onclick="nextImage()"><</button>
       </div>
 
       <div class="button-group">
@@ -69,25 +69,29 @@ function showImage(index) {
   if (!voterName) return;
 
   fetch("get_vote_status.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: voterName, imageIndex: currentIndex })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === "started") {
-        const startTime = new Date(data.start_time.replace(' ', 'T'));
-        const now = new Date();
-        let elapsed = (now - startTime) / 1000;
-        elapsed = Math.max(0, elapsed);
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name: voterName, imageIndex: currentIndex })
+})
+.then(res => res.json())
+.then(data => {
+  const correctAnswerEl = document.querySelector(".correct-answer");
 
-        if (elapsed < 300) {
-          updateTimerUI(300 - elapsed);
-        } else {
-          disableVoteButtons();
-        }
-      }
-    });
+  if (data.status === "started") {
+    const startTime = new Date(data.start_time.replace(' ', 'T'));
+    const now = new Date();
+    let elapsed = (now - startTime) / 1000;
+    elapsed = Math.max(0, elapsed);
+
+    if (elapsed < 300) {
+      correctAnswerEl.textContent = "Oota hääletuse lõpuni";
+      updateTimerUI(300 - elapsed);
+    } else {
+      correctAnswerEl.textContent = images[index].correct === "Paris" ? "Päris" : "AI";
+      disableVoteButtons();
+    }
+  }
+});
 }
 
 function updateTimerUI(secondsLeft) {
