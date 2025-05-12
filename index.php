@@ -34,7 +34,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
       <div class="guess-info">
   		<p>Kõik kasutajate arvamused:</p>
-  		<p id="vote-counts">AI - 0 &nbsp;&nbsp;&nbsp; Päris - 0</p>
+  		<p id="vote-counts">AI - 0     Päris - 0     <span id="next-update">(Uuendamine 5s...)</span></p>
   		<p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
 	  </div>
     </div>
@@ -245,9 +245,22 @@ function fetchResults() {
     .then(res => res.json())
     .then(data => {
       if (data && typeof data.AI !== 'undefined') {
-        document.getElementById("vote-counts").textContent = `AI - ${data.AI}     Päris - ${data.Paris}`;
+        document.getElementById("vote-counts").innerHTML = `AI - ${data.AI}     Päris - ${data.Paris}     <span id="next-update">(Uuendamine ${updateInterval}s...)</span>`;
+        secondsLeft = updateInterval;
       }
     });
+}
+
+function startAutoUpdate() {
+  setInterval(() => {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      fetchResults();
+    } else {
+      const updateSpan = document.getElementById("next-update");
+      if (updateSpan) updateSpan.textContent = `(Uuendamine ${secondsLeft}s...)`;
+    }
+  }, 1000);
 }
 
 window.onload = function () {
