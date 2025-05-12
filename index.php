@@ -20,9 +20,9 @@ while ($row = mysqli_fetch_assoc($result)) {
   <body>
     <div class="container">
       <div class="image-wrapper">
-        <button class="nav-button left" onclick="prevImage()">⟨</button>
+        <button class="nav-button left" onclick="prevImage()">⯈</button>
         <img src="" alt="Guess if this is AI or Real" class="guess-image" />
-        <button class="nav-button right" onclick="nextImage()">⟩</button>
+        <button class="nav-button right" onclick="nextImage()">⯉</button>
       </div>
 
       <div class="button-group">
@@ -33,10 +33,10 @@ while ($row = mysqli_fetch_assoc($result)) {
       <p id="vote-timer"></p>
 
       <div class="guess-info">
-  		<p>Kõik kasutajate arvamused:</p>
-  		<p id="vote-counts">AI - 0     Päris - 0     <span id="next-update">(Uuendamine 5s...)</span></p>
-  		<p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
-	  </div>
+        <p>Kõik kasutajate arvamused:</p>
+        <p id="vote-counts">AI - 0     Päris - 0     <span id="next-update">(Uuendamine 5s...)</span></p>
+        <p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
+      </div>
     </div>
 
     <div id="nameModal" class="modal">
@@ -57,6 +57,8 @@ let currentIndex = 0;
 let voterName = "";
 let pendingVote = null;
 let voteCountdown;
+const updateInterval = 5;
+let secondsLeft = updateInterval;
 const imgElement = document.querySelector(".guess-image");
 
 function showImage(index) {
@@ -120,11 +122,13 @@ function disableVoteButtons() {
 function nextImage() {
   currentIndex = (currentIndex + 1) % images.length;
   showImage(currentIndex);
+  fetchResults();
 }
 
 function prevImage() {
   currentIndex = (currentIndex - 1 + images.length) % images.length;
   showImage(currentIndex);
+  fetchResults();
 }
 
 function submitGuess(choice) {
@@ -144,7 +148,7 @@ function submitGuess(choice) {
       if (data.status === "started") {
         sendGuess(choice);
       } else {
-		const dbFriendlyChoice = (choice === "Päris") ? "Paris" : choice;
+        const dbFriendlyChoice = (choice === "Päris") ? "Paris" : choice;
         fetch("start_user_vote.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -152,15 +156,15 @@ function submitGuess(choice) {
         })
           .then(res => res.text())
           .then(resp => {
-  			if (resp === "OK") {
-    			alert(`Sinu hääl on salvestatud: ${choice}`);
-    			showImage(currentIndex);
-  			} else if (resp === "Already started") {
-    			sendGuess(choice);
-  			} else {
-    			alert("Viga hääletuse alustamisel.");
-  			}
-		});
+            if (resp === "OK") {
+              alert(`Sinu hääl on salvestatud: ${choice}`);
+              showImage(currentIndex);
+            } else if (resp === "Already started") {
+              sendGuess(choice);
+            } else {
+              alert("Viga hääletuse alustamisel.");
+            }
+          });
       }
     });
 }
@@ -182,6 +186,7 @@ function sendGuess(choice) {
       if (response === "OK") {
         alert(`Sinu hääl on salvestatud: ${choice}`);
         showImage(currentIndex);
+        fetchResults();
       } else if (response === "TOO_LATE") {
         alert("Aeg selle pildi hääletamiseks on läbi.");
         showImage(currentIndex);
@@ -265,12 +270,9 @@ function startAutoUpdate() {
 
 window.onload = function () {
   showImage(currentIndex);
-  setInterval(fetchResults, 5000); // refresh every 5 seconds
+  fetchResults();
+  startAutoUpdate();
 };
-
-
-
-</script>
-
-</body>
+    </script>
+  </body>
 </html>
