@@ -226,4 +226,34 @@ END
     error_log("Error creating trigger update_tulemused_after_vote: " . $e->getMessage());
 }
 
+try {
+    $triggerExists = $mysqli->query("
+        SELECT TRIGGER_NAME 
+        FROM information_schema.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = '{$databaseName}' AND TRIGGER_NAME = 'update_tulemused_after_update'
+    ");
+
+    if ($triggerExists->num_rows === 0) {
+        $createUpdateTriggerSQL = <<<SQL
+CREATE TRIGGER update_tulemused_after_update
+AFTER UPDATE ON HAALETUS
+FOR EACH ROW
+BEGIN
+    IF NEW.Otsus != OLD.Otsus THEN
+        UPDATE TULEMUSED
+        SET 
+            AI = AI - IF(OLD.Otsus = 'AI', 1, 0) + IF(NEW.Otsus = 'AI', 1, 0),
+            Paris = Paris - IF(OLD.Otsus = 'Paris', 1, 0) + IF(NEW.Otsus = 'Paris', 1, 0)
+        WHERE Pildi_id = NEW.Pildi_id;
+    END IF;
+END
+SQL;
+
+        $mysqli->query($createUpdateTriggerSQL);
+    }
+} catch (mysqli_sql_exception $e) {
+    error_log("Error creating update trigger: " . $e->getMessage());
+}
+
+
 ?>
