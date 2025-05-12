@@ -20,9 +20,9 @@ while ($row = mysqli_fetch_assoc($result)) {
   <body>
     <div class="container">
       <div class="image-wrapper">
-        <button class="nav-button left" onclick="prevImage()">⬨</button>
+        <button class="nav-button left" onclick="prevImage()">⟨</button>
         <img src="" alt="Guess if this is AI or Real" class="guess-image" />
-        <button class="nav-button right" onclick="nextImage()">⬩</button>
+        <button class="nav-button right" onclick="nextImage()">⟩</button>
       </div>
 
       <div class="button-group">

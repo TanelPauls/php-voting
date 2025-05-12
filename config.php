@@ -16,6 +16,8 @@ $databaseName = $_ENV['DB_NAME'];
 
 $mysqli = new mysqli($databaseHost, $databaseUsername, $databasePassword, $databaseName);
 
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 if ($mysqli->connect_error) {
     error_log("Database connection failed: " . $mysqli->connect_error);
     die("Unable to connect to the database.");

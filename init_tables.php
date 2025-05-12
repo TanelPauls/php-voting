@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-/*
+
 $sql = "
 DROP TABLE IF EXISTS LOGI;
 ";
@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS PILDID;
 if (!$mysqli->query($sql)) {
     error_log("Error deleting table: PILDID." . $mysqli->error);
 }
-*/
+
 
 
 
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS LOGI (
     Pildi_id INT NOT NULL,
     H_alguse_aeg DATETIME NOT NULL,
     Haale_andmise_aeg DATETIME NOT NULL,
-    Haale_suund ENUM('poolt', 'vastu') NOT NULL,
+    Haale_suund ENUM('AI', 'Paris') NOT NULL,
     FOREIGN KEY (Haaletaja_id) REFERENCES HAALETAJAD(Haaletaja_id),
     FOREIGN KEY (Pildi_id) REFERENCES PILDID(Pildi_id)
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -126,4 +126,57 @@ INSERT IGNORE INTO PILDID (URL) VALUES
 if (!$mysqli->query($sql)) {
     error_log("Error inserting to table PILDID: " . $mysqli->error);
 }
+
+$procedureExists = $mysqli->query("SHOW PROCEDURE STATUS WHERE Db = '{$databaseName}' AND Name = 'CAST_VOTE'");
+if ($procedureExists->num_rows === 0) {
+    $sql = "
+    CREATE PROCEDURE CAST_VOTE (
+        IN in_Haaletaja_id INT,
+        IN in_Pildi_id INT,
+        IN in_Otsus ENUM('AI', 'Paris')
+    )
+    BEGIN
+        DECLARE existing_id INT;
+        DECLARE existing_H_alguse DATETIME;
+        DECLARE minutes_diff INT;
+        DECLARE current_time DATETIME;
+
+        SET current_time = NOW();
+
+        SELECT id, H_alguse_aeg INTO existing_id, existing_H_alguse
+        FROM HAALETUS
+        WHERE Haaletaja_id = in_Haaletaja_id AND Pildi_id = in_Pildi_id
+        LIMIT 1;
+
+        IF existing_id IS NULL THEN
+            INSERT INTO HAALETUS (Haaletaja_id, Pildi_id, H_alguse_aeg, Haaletuse_aeg, Otsus)
+            VALUES (in_Haaletaja_id, in_Pildi_id, current_time, current_time, in_Otsus);
+
+            INSERT INTO LOGI (Haaletaja_id, Pildi_id, H_alguse_aeg, Haale_andmise_aeg, Haale_suund)
+            VALUES (in_Haaletaja_id, in_Pildi_id, current_time, current_time, in_Otsus);
+
+        ELSE
+            SET minutes_diff = TIMESTAMPDIFF(MINUTE, existing_H_alguse, current_time);
+
+            IF minutes_diff < 5 THEN
+                UPDATE HAALETUS
+                SET Haaletuse_aeg = current_time,
+                    Otsus = in_Otsus
+                WHERE id = existing_id;
+
+                INSERT INTO LOGI (Haaletaja_id, Pildi_id, H_alguse_aeg, Haale_andmise_aeg, Haale_suund)
+                VALUES (in_Haaletaja_id, in_Pildi_id, existing_H_alguse, current_time, in_Otsus);
+            ELSE
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Voting period has expired. No changes allowed.';
+            END IF;
+        END IF;
+    END
+    ";
+
+    if (!$mysqli->query($sql)) {
+        error_log("Error creating CAST_VOTE procedure: " . $mysqli->error);
+    }
+}
+
 ?>
