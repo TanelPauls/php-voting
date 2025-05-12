@@ -90,8 +90,8 @@ CREATE TABLE IF NOT EXISTS TULEMUSED (
     Pildi_id INT PRIMARY KEY,
     Haaletajate_arv INT NOT NULL,    
     H_alguse_aeg DATETIME NOT NULL,
-    Poolt INT,
-    Vastu INT,
+    AI INT,
+    Paris INT,
     FOREIGN KEY (Pildi_id) REFERENCES PILDID(Pildi_id) ON DELETE CASCADE
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 ";
@@ -190,33 +190,34 @@ try {
     if ($triggerExists->num_rows === 0) {
         $createTriggerSQL = "
         CREATE TRIGGER update_tulemused_after_vote
-        AFTER INSERT ON HAALETUS
-        FOR EACH ROW
-        BEGIN
-            DECLARE exists_count INT DEFAULT 0;
+AFTER INSERT ON HAALETUS
+FOR EACH ROW
+BEGIN
+    DECLARE exists_count INT DEFAULT 0;
 
-            SELECT COUNT(*) INTO exists_count
-            FROM TULEMUSED
-            WHERE Pildi_id = NEW.Pildi_id;
+    SELECT COUNT(*) INTO exists_count
+    FROM TULEMUSED
+    WHERE Pildi_id = NEW.Pildi_id;
 
-            IF exists_count = 0 THEN
-                INSERT INTO TULEMUSED (Pildi_id, Haaletajate_arv, H_alguse_aeg, Poolt, Vastu)
-                VALUES (
-                    NEW.Pildi_id,
-                    1,
-                    NEW.H_alguse_aeg,
-                    IF(NEW.Otsus = 'AI', 1, 0),
-                    IF(NEW.Otsus = 'Paris', 1, 0)
-                );
-            ELSE
-                UPDATE TULEMUSED
-                SET 
-                    Haaletajate_arv = Haaletajate_arv + 1,
-                    Poolt = Poolt + IF(NEW.Otsus = 'AI', 1, 0),
-                    Vastu = Vastu + IF(NEW.Otsus = 'Paris', 1, 0)
-                WHERE Pildi_id = NEW.Pildi_id;
-            END IF;
-        END
+    IF exists_count = 0 THEN
+        INSERT INTO TULEMUSED (Pildi_id, Haaletajate_arv, H_alguse_aeg, AI, Paris)
+        VALUES (
+            NEW.Pildi_id,
+            1,
+            NEW.H_alguse_aeg,
+            IF(NEW.Otsus = 'AI', 1, 0),
+            IF(NEW.Otsus = 'Paris', 1, 0)
+        );
+    ELSE
+        UPDATE TULEMUSED
+        SET 
+            Haaletajate_arv = Haaletajate_arv + 1,
+            AI = AI + IF(NEW.Otsus = 'AI', 1, 0),
+            Paris = Paris + IF(NEW.Otsus = 'Paris', 1, 0)
+        WHERE Pildi_id = NEW.Pildi_id;
+    END IF;
+END
+
         ";
 
         $mysqli->query($createTriggerSQL);
