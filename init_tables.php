@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-/*
+
 $sql = "
 DROP TABLE IF EXISTS LOGI;
 ";
@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS PILDID;
 if (!$mysqli->query($sql)) {
     error_log("Error deleting table: PILDID." . $mysqli->error);
 }
-*/
+
 
 
 
@@ -48,8 +48,7 @@ if (!$mysqli->query($sql)) {
 $sql = "
 CREATE TABLE IF NOT EXISTS PILDID (
     Pildi_id INT AUTO_INCREMENT PRIMARY KEY,
-    URL VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
-    H_alguse_aeg DATETIME
+    URL VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 ";
 
@@ -74,8 +73,9 @@ CREATE TABLE IF NOT EXISTS HAALETUS (
     id INT AUTO_INCREMENT PRIMARY KEY,
     Haaletaja_id INT NOT NULL,
     Pildi_id INT NOT NULL,
+    H_alguse_aeg DATETIME NOT NULL,
     Haaletuse_aeg DATETIME NOT NULL,
-    Otsus ENUM('poolt', 'vastu') NOT NULL,
+    Otsus ENUM('AI', 'Paris') NOT NULL,
     FOREIGN KEY (Haaletaja_id) REFERENCES HAALETAJAD(Haaletaja_id) ON DELETE CASCADE,
     FOREIGN KEY (Pildi_id) REFERENCES PILDID(Pildi_id) ON DELETE CASCADE
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

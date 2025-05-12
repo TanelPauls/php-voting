@@ -31,13 +31,6 @@ while ($row = mysqli_fetch_assoc($result)) {
   		<button id="real-button" class="guess-button" onclick="submitGuess('Päris')">Päris</button>
 	  </div>
 
-
-	  <div class="vote-message-row" id="vote-message-row">
-  		<span id="vote-message"></span>
-  		<button id="start-vote-btn" class="guess-button" onclick="startVote()">Alusta</button>
-	  </div>
-	  <p id="vote-timer"></p>
-
       <div class="guess-info">
         <p>Kõik kasutajate arvamused:</p>
         <p>AI - 3 &nbsp;&nbsp;&nbsp; Päris - 7</p>
@@ -70,50 +63,41 @@ function showImage(index) {
   const image = images[index];
   imgElement.src = image.url;
 
-  const voteMessage = document.getElementById("vote-message");
-  const voteTimer = document.getElementById("vote-timer");
-  const startButton = document.getElementById("start-vote-btn");
+  // Always disable buttons by default
+  document.getElementById("ai-button").disabled = true;
+  document.getElementById("real-button").disabled = true;
+  document.getElementById("vote-timer").textContent = "";
 
-  voteMessage.textContent = "";
-  voteTimer.textContent = "";
-  startButton.style.display = "none";
+  // If user is not known yet, don't request vote status
+  if (!voterName) return;
 
-  const startTimeStr = image.start_time;
+  fetch("get_vote_status.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: voterName, imageIndex: currentIndex })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "started") {
+        const startTime = new Date(data.start_time.replace(' ', 'T'));
+        const now = new Date();
+        let elapsed = (now - startTime) / 1000;
+        elapsed = Math.max(0, elapsed);
 
-  if (!startTimeStr) {
-    voteMessage.textContent = "Hääletus pole veel alganud.";
-    startButton.style.display = "inline-block";
-	document.getElementById("ai-button").disabled = true;
-    document.getElementById("real-button").disabled = true;
-    return;
-  }
-
-  const startTime = new Date(startTimeStr.replace(' ', 'T'));
-  if (isNaN(startTime.getTime())) {
-    voteMessage.textContent = "Vigane algusaeg.";
-    return;
-  }
-
-  const now = new Date();
-  let elapsed = (now - startTime) / 1000;
-  elapsed = Math.max(0, elapsed);
-
-  if (elapsed > 300) {
-    voteMessage.textContent = "Hääletus lõppenud.";
-	document.getElementById("ai-button").disabled = true;
-    document.getElementById("real-button").disabled = true;
-    return;
-  }
-
-  document.getElementById("ai-button").disabled = false;
-  document.getElementById("real-button").disabled = false;
-
-  voteMessage.textContent = "Hääletus käib";
-  updateTimer(300 - elapsed);
+        if (elapsed < 300) {
+          document.getElementById("ai-button").disabled = false;
+          document.getElementById("real-button").disabled = false;
+          updateTimerUI(300 - elapsed);
+        } else {
+          disableVoteButtons();
+        }
+      } else {
+        disableVoteButtons();
+      }
+    });
 }
 
-function updateTimer(secondsLeft) {
-  clearInterval(voteCountdown);
+function updateTimerUI(secondsLeft) {
   const voteTimer = document.getElementById("vote-timer");
 
   function formatTime(s) {
@@ -122,17 +106,24 @@ function updateTimer(secondsLeft) {
     return `${m}:${s2.toString().padStart(2, '0')}`;
   }
 
+  voteTimer.textContent = formatTime(secondsLeft) + " aega, et muuta arvamust";
+
+  clearInterval(voteCountdown);
   voteCountdown = setInterval(() => {
+    secondsLeft--;
     if (secondsLeft <= 0) {
       clearInterval(voteCountdown);
-      voteTimer.textContent = "Hääletus lõppenud.";
-      document.getElementById("vote-message").textContent = "Hääletus lõppenud.";
-      return;
+      disableVoteButtons();
+    } else {
+      voteTimer.textContent = formatTime(secondsLeft) + " aega, et muuta arvamust";
     }
-
-    voteTimer.textContent = "Aega jäänud: " + formatTime(secondsLeft);
-    secondsLeft--;
   }, 1000);
+}
+
+function disableVoteButtons() {
+  document.getElementById("ai-button").disabled = true;
+  document.getElementById("real-button").disabled = true;
+  document.getElementById("vote-timer").textContent = "Aeg on läbi.";
 }
 
 function nextImage() {
@@ -152,28 +143,59 @@ function submitGuess(choice) {
     return;
   }
 
-  alert(`Valisid: ${choice} (${voterName})`);
-}
-
-function startVote() {
-  fetch("start_vote.php", {
+  // Step 1: Check if vote already started
+  fetch("get_vote_status.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageIndex: currentIndex })
+    body: JSON.stringify({ name: voterName, imageIndex: currentIndex })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "started") {
+        // Already started → just submit guess
+        sendGuess(choice);
+      } else {
+        // Not started → start timer, then submit guess
+        fetch("start_user_vote.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: voterName, imageIndex: currentIndex })
+        })
+          .then(res => res.text())
+          .then(resp => {
+            if (resp === "OK" || resp === "Already started") {
+              sendGuess(choice);
+            } else {
+              alert("Viga hääletuse alustamisel.");
+            }
+          });
+      }
+    });
+}
+
+function sendGuess(choice) {
+  fetch("submit_guess.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: voterName, imageIndex: currentIndex, choice })
   })
     .then(res => res.text())
     .then(response => {
       if (response === "OK") {
-        images[currentIndex].start_time = new Date().toISOString();
+        alert(`Sinu hääl on salvestatud: ${choice}`);
+        showImage(currentIndex); // refresh timer
+      } else if (response === "TOO_LATE") {
+        alert("Aeg selle pildi hääletamiseks on läbi.");
         showImage(currentIndex);
       } else {
-        alert("Viga hääletuse alustamisel: " + response);
+        alert("Viga salvestamisel: " + response);
       }
     })
     .catch(() => {
-      alert("Võrguviga hääletuse alustamisel.");
+      alert("Võrguviga hääletamisel.");
     });
 }
+
 
 function openModal() {
   document.getElementById("nameModal").style.display = "block";
@@ -202,6 +224,7 @@ function confirmName() {
       if (response === "OK") {
         voterName = `${eesnimi} ${perenimi}`;
         closeModal();
+        showImage(currentIndex); // reload vote status
         if (pendingVote) {
           alert(`Valisid: ${pendingVote} (${voterName})`);
           pendingVote = null;
@@ -219,6 +242,7 @@ window.onload = function () {
   showImage(currentIndex);
 };
 </script>
+
 
 
 </html>
