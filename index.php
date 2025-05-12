@@ -77,25 +77,32 @@ function showImage(index) {
   })
     .then(res => res.json())
     .then(data => {
-      const correctAnswerEl = document.querySelector(".correct-answer");
+  const correctAnswerEl = document.querySelector(".correct-answer");
 
-      if (data.status === "started") {
-        const startTime = new Date(data.start_time.replace(' ', 'T'));
-        const now = new Date();
-        let elapsed = (now - startTime) / 1000;
-        elapsed = Math.max(0, elapsed);
+  if (data.status === "started") {
+    const startTime = new Date(data.start_time.replace(' ', 'T'));
+    const now = new Date();
+    let elapsed = (now - startTime) / 1000;
+    elapsed = Math.max(0, elapsed);
 
-        if (elapsed < 300) {
-          correctAnswerEl.textContent = "Oota hääletuse lõpuni";
-          updateTimerUI(300 - elapsed);
-        } else {
-          correctAnswerEl.textContent = images[index].correct || "Oota hääletuse lõpuni";
-          disableVoteButtons();
-        }
-      } else {
-        correctAnswerEl.textContent = "Oota hääletuse algust";
-      }
-    });
+    if (elapsed < 300) {
+      correctAnswerEl.textContent = "Oota hääletuse lõpuni";
+      document.getElementById("ai-button").disabled = false;
+      document.getElementById("real-button").disabled = false;
+      updateTimerUI(300 - elapsed);
+    } else {
+      correctAnswerEl.textContent = images[index].correct || "Tulemus puudub";
+      disableVoteButtons();
+    }
+  } else {
+    // Voting hasn't started for this image → enable buttons
+    correctAnswerEl.textContent = "Oota hääletuse lõpuni";
+    document.getElementById("ai-button").disabled = false;
+    document.getElementById("real-button").disabled = false;
+    document.getElementById("vote-timer").textContent = "";
+  }
+});
+
 }
 
 function updateTimerUI(secondsLeft) {

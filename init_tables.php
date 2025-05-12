@@ -120,7 +120,7 @@ if (!$mysqli->query($sql)) {
 
 $sql = "
 INSERT IGNORE INTO PILDID (URL, Oige_vastus) VALUES
-('https://cdn.mos.cms.futurecdn.net/44kXT82VEHfqTG6uQ9kHVh-1200-80.jpg', 'Paris_asd'),
+('https://cdn.mos.cms.futurecdn.net/44kXT82VEHfqTG6uQ9kHVh-1200-80.jpg', 'Paris_asdä'),
 ('https://c8.alamy.com/comp/RC0T0N/funny-caricature-of-mona-lisa-painting-RC0T0N.jpg', 'Tommy_öäõü');
 ";
 
