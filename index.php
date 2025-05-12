@@ -31,11 +31,11 @@ while ($row = mysqli_fetch_assoc($result)) {
         <button class="guess-button" onclick="submitGuess('Päris')">Päris</button>
       </div>
 
-	  <div class="vote-status">
-  		<p id="vote-message"></p>
-  		<p id="vote-timer"></p>
-  		<button id="start-vote-btn" onclick="startVote()">Alusta</button>
+	  <div class="vote-message-row" id="vote-message-row">
+  		<span id="vote-message"></span>
+  		<button id="start-vote-btn" class="guess-button" onclick="startVote()">Alusta</button>
 	  </div>
+	  <p id="vote-timer"></p>
 
       <div class="guess-info">
         <p>Kõik kasutajate arvamused:</p>
@@ -109,7 +109,7 @@ while ($row = mysqli_fetch_assoc($result)) {
   const startTimeStr = images[index].start_time;
 
   if (!startTimeStr) {
-    voteMessage.textContent = "Hääletus pole veel alganud.";
+    voteMessage.textContent = "Hääletus pole veel alanud.";
     startButton.style.display = "inline-block";
     return;
   }
