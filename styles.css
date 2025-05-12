@@ -78,7 +78,7 @@ body {
   border-radius: 8px;
   background-color: #007bff;
   color: white;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s, opacity 0.3s;
 }
 
 .guess-button:hover {
@@ -184,6 +184,8 @@ body {
 }
 
 .guess-button:disabled {
-  background-color: #cccccc;
+  background-color: #aaa;
+  color: #eee;
   cursor: not-allowed;
+  opacity: 0.6;
 }
