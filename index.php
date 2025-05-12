@@ -56,70 +56,18 @@ while ($row = mysqli_fetch_assoc($result)) {
     </div>
   </body>
   <script>
-  const images = <?php echo json_encode($images); ?>;
-  let currentIndex = 0;
-  let voterName = "";
-  let pendingVote = null;
+const images = <?php echo json_encode($images); ?>;
+let currentIndex = 0;
+let voterName = "";
+let pendingVote = null;
+let voteCountdown;
+const imgElement = document.querySelector(".guess-image");
 
-  const imgElement = document.querySelector(".guess-image");
+function showImage(index) {
+  clearInterval(voteCountdown);
 
-  function showImage(index) {
-    imgElement.src = images[index];
-  }
-
-  function nextImage() {
-    currentIndex = (currentIndex + 1) % images.length;
-    showImage(currentIndex);
-  }
-
-  function prevImage() {
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
-    showImage(currentIndex);
-  }
-
-  function openModal() {
-    document.getElementById("nameModal").style.display = "block";
-  }
-
-  function closeModal() {
-    document.getElementById("nameModal").style.display = "none";
-  }
-
-  function submitGuess(choice) {
-  if (!voterName) {
-    pendingVote = choice;
-    openModal();
-    return;
-  }
-
-  alert(`Valisid: ${choice} (${voterName})`);
-  }
-
-function startVote() {
-  fetch("start_vote.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageIndex: currentIndex })
-  })
-    .then(res => res.text())
-    .then(response => {
-      if (response === "OK") {
-        // Simulate that start_time is now
-        images[currentIndex].start_time = new Date().toISOString();
-        showImage(currentIndex); // Refresh UI to show countdown
-      } else {
-        alert("Viga hääletuse alustamisel: " + response);
-      }
-    })
-    .catch(() => {
-      alert("Võrguviga hääletuse alustamisel.");
-    });
-}
-
-
-  function showImage(index) {
-	clearInterval(voteCountdown);
-  imgElement.src = images[index].url;
+  const image = images[index];
+  imgElement.src = image.url;
 
   const voteMessage = document.getElementById("vote-message");
   const voteTimer = document.getElementById("vote-timer");
@@ -129,19 +77,25 @@ function startVote() {
   voteTimer.textContent = "";
   startButton.style.display = "none";
 
-  const startTimeStr = images[index].start_time;
+  const startTimeStr = image.start_time;
 
   if (!startTimeStr) {
-    voteMessage.textContent = "Hääletus pole veel alanud.";
+    voteMessage.textContent = "Hääletus pole veel alganud.";
     startButton.style.display = "inline-block";
     return;
   }
 
-  const startTime = new Date(startTimeStr.replace(' ', 'T')); // Safe ISO format
-  const now = new Date();
-  const elapsed = (now - startTime) / 1000;
+  const startTime = new Date(startTimeStr.replace(' ', 'T'));
+  if (isNaN(startTime.getTime())) {
+    voteMessage.textContent = "Vigane algusaeg.";
+    return;
+  }
 
-  if (elapsed > 5 * 60) {
+  const now = new Date();
+  let elapsed = (now - startTime) / 1000;
+  elapsed = Math.max(0, elapsed);
+
+  if (elapsed > 300) {
     voteMessage.textContent = "Hääletus lõppenud.";
     return;
   }
@@ -150,19 +104,15 @@ function startVote() {
   updateTimer(300 - elapsed);
 }
 
-
-let voteCountdown;
-
 function updateTimer(secondsLeft) {
   clearInterval(voteCountdown);
+  const voteTimer = document.getElementById("vote-timer");
 
   function formatTime(s) {
     const m = Math.floor(s / 60);
     const s2 = Math.floor(s % 60);
     return `${m}:${s2.toString().padStart(2, '0')}`;
   }
-
-  const voteTimer = document.getElementById("vote-timer");
 
   voteCountdown = setInterval(() => {
     if (secondsLeft <= 0) {
@@ -177,8 +127,55 @@ function updateTimer(secondsLeft) {
   }, 1000);
 }
 
+function nextImage() {
+  currentIndex = (currentIndex + 1) % images.length;
+  showImage(currentIndex);
+}
 
-  function confirmName() {
+function prevImage() {
+  currentIndex = (currentIndex - 1 + images.length) % images.length;
+  showImage(currentIndex);
+}
+
+function submitGuess(choice) {
+  if (!voterName) {
+    pendingVote = choice;
+    openModal();
+    return;
+  }
+
+  alert(`Valisid: ${choice} (${voterName})`);
+}
+
+function startVote() {
+  fetch("start_vote.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageIndex: currentIndex })
+  })
+    .then(res => res.text())
+    .then(response => {
+      if (response === "OK") {
+        images[currentIndex].start_time = new Date().toISOString();
+        showImage(currentIndex);
+      } else {
+        alert("Viga hääletuse alustamisel: " + response);
+      }
+    })
+    .catch(() => {
+      alert("Võrguviga hääletuse alustamisel.");
+    });
+}
+
+function openModal() {
+  document.getElementById("nameModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("nameModal").style.display = "none";
+}
+
+function confirmName() {
   const eesnimi = document.getElementById("eesnimi").value.trim();
   const perenimi = document.getElementById("perenimi").value.trim();
 
@@ -187,36 +184,33 @@ function updateTimer(secondsLeft) {
     return;
   }
 
-  // Send to database
   fetch("register_user.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ eesnimi, perenimi })
   })
-  .then(res => res.text())
-  .then(response => {
-    if (response === "OK") {
-      voterName = `${eesnimi} ${perenimi}`;
-      closeModal();
-
-      if (pendingVote) {
-        alert(`Valisid: ${pendingVote} (${voterName})`);
-        pendingVote = null;
+    .then(res => res.text())
+    .then(response => {
+      if (response === "OK") {
+        voterName = `${eesnimi} ${perenimi}`;
+        closeModal();
+        if (pendingVote) {
+          alert(`Valisid: ${pendingVote} (${voterName})`);
+          pendingVote = null;
+        }
+      } else {
+        alert("Viga kasutaja salvestamisel: " + response);
       }
-    } else {
-      alert("Viga kasutaja salvestamisel: " + response);
-    }
-  })
-  .catch(err => {
-    alert("Võrguviga kasutaja salvestamisel.");
-  });
+    })
+    .catch(() => {
+      alert("Võrguviga kasutaja salvestamisel.");
+    });
 }
 
-
-  window.onload = function () {
-	clearInterval(voteCountdown);
-    showImage(currentIndex);
-  };
+window.onload = function () {
+  showImage(currentIndex);
+};
 </script>
+
 
 </html>
