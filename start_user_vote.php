@@ -1,20 +1,21 @@
 <?php
-include_once("config.php");
+require_once 'config.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 $name = trim($data['name'] ?? '');
-$imageIndex = (int)($data['imageIndex'] ?? 0);
+$imageIndex = (int)($data['imageIndex'] ?? -1);
+$choice = $data['choice'] ?? '';
 
-if (!$name || $imageIndex < 0) {
+if (!$name || $imageIndex < 0 || !in_array($choice, ['AI', 'Paris'])) {
     http_response_code(400);
-    echo "Missing input";
+    echo "Missing or invalid input";
     exit;
 }
 
 list($firstName, $lastName) = explode(' ', $name, 2);
 
-// Get user ID
-$stmt = $mysqli->prepare("SELECT Haaletaja_id FROM HAALETAJAD WHERE Eesnimi=? AND Perenimi=?");
+// 1. Get Haaletaja_id
+$stmt = $mysqli->prepare("SELECT Haaletaja_id FROM HAALETAJAD WHERE Eesnimi = ? AND Perenimi = ?");
 $stmt->bind_param("ss", $firstName, $lastName);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -25,7 +26,7 @@ if (!$user = $res->fetch_assoc()) {
 }
 $haaletaja_id = $user['Haaletaja_id'];
 
-// Get image ID
+// 2. Get Pildi_id
 $res = $mysqli->query("SELECT Pildi_id FROM PILDID LIMIT 1 OFFSET $imageIndex");
 if (!$image = $res->fetch_assoc()) {
     http_response_code(404);
@@ -34,23 +35,18 @@ if (!$image = $res->fetch_assoc()) {
 }
 $pildi_id = $image['Pildi_id'];
 
-// Check if vote already exists
-$stmt = $mysqli->prepare("SELECT id FROM HAALETUS WHERE Haaletaja_id=? AND Pildi_id=?");
-$stmt->bind_param("ii", $haaletaja_id, $pildi_id);
-$stmt->execute();
-$res = $stmt->get_result();
-if ($res->fetch_assoc()) {
-    echo "Already started";
-    exit;
-}
-
-// Insert new voting session
-$stmt = $mysqli->prepare("INSERT INTO HAALETUS (Haaletaja_id, Pildi_id, H_alguse_aeg, Haaletuse_aeg, Otsus)
-                          VALUES (?, ?, NOW(), NULL, NULL)");
-$stmt->bind_param("ii", $haaletaja_id, $pildi_id);
-if ($stmt->execute()) {
+// 3. Call CAST_VOTE with real choice
+try {
+    $stmt = $mysqli->prepare("CALL CAST_VOTE(?, ?, ?)");
+    $stmt->bind_param("iis", $haaletaja_id, $pildi_id, $choice);
+    $stmt->execute();
     echo "OK";
-} else {
-    http_response_code(500);
-    echo "DB error";
+} catch (mysqli_sql_exception $e) {
+    if (strpos($e->getMessage(), 'Voting period has expired') !== false) {
+        echo "TOO_LATE";
+    } else {
+        error_log("CAST_VOTE error: " . $e->getMessage());
+        http_response_code(500);
+        echo "DB error";
+    }
 }

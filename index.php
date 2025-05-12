@@ -144,10 +144,11 @@ function submitGuess(choice) {
       if (data.status === "started") {
         sendGuess(choice);
       } else {
+		const dbFriendlyChoice = (choice === "Päris") ? "Paris" : choice;
         fetch("start_user_vote.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: voterName, imageIndex: currentIndex })
+          body: JSON.stringify({ name: voterName, imageIndex: currentIndex, choice: dbFriendlyChoice })
         })
           .then(res => res.text())
           .then(resp => {
