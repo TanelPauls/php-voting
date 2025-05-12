@@ -95,6 +95,28 @@ while ($row = mysqli_fetch_assoc($result)) {
   alert(`Valisid: ${choice} (${voterName})`);
   }
 
+function startVote() {
+  fetch("start_vote.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageIndex: currentIndex })
+  })
+    .then(res => res.text())
+    .then(response => {
+      if (response === "OK") {
+        // Simulate that start_time is now
+        images[currentIndex].start_time = new Date().toISOString();
+        showImage(currentIndex); // Refresh UI to show countdown
+      } else {
+        alert("Viga hääletuse alustamisel: " + response);
+      }
+    })
+    .catch(() => {
+      alert("Võrguviga hääletuse alustamisel.");
+    });
+}
+
+
   function showImage(index) {
   imgElement.src = images[index].url;
 

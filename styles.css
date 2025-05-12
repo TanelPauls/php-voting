@@ -181,5 +181,4 @@ body {
 
 #start-vote-btn {
   flex-shrink: 0; /* prevent shrinking */
-  margin: 0; /* remove default spacing */
 }
