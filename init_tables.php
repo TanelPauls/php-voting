@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-/*
+
 $sql = "
 DROP TABLE IF EXISTS LOGI;
 ";
@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS PILDID;
 if (!$mysqli->query($sql)) {
     error_log("Error deleting table: PILDID." . $mysqli->error);
 }
-*/
+
 
 
 
@@ -178,6 +178,51 @@ SQL;
     } catch (mysqli_sql_exception $e) {
         error_log("Failed to create CAST_VOTE: " . $e->getMessage());
     }
+}
+
+try {
+    $triggerExists = $mysqli->query("
+        SELECT TRIGGER_NAME 
+        FROM information_schema.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = '{$databaseName}' AND TRIGGER_NAME = 'update_tulemused_after_vote'
+    ");
+
+    if ($triggerExists->num_rows === 0) {
+        $createTriggerSQL = "
+        CREATE TRIGGER update_tulemused_after_vote
+        AFTER INSERT ON HAALETUS
+        FOR EACH ROW
+        BEGIN
+            DECLARE exists_count INT DEFAULT 0;
+
+            SELECT COUNT(*) INTO exists_count
+            FROM TULEMUSED
+            WHERE Pildi_id = NEW.Pildi_id;
+
+            IF exists_count = 0 THEN
+                INSERT INTO TULEMUSED (Pildi_id, Haaletajate_arv, H_alguse_aeg, Poolt, Vastu)
+                VALUES (
+                    NEW.Pildi_id,
+                    1,
+                    NEW.H_alguse_aeg,
+                    IF(NEW.Otsus = 'AI', 1, 0),
+                    IF(NEW.Otsus = 'Paris', 1, 0)
+                );
+            ELSE
+                UPDATE TULEMUSED
+                SET 
+                    Haaletajate_arv = Haaletajate_arv + 1,
+                    Poolt = Poolt + IF(NEW.Otsus = 'AI', 1, 0),
+                    Vastu = Vastu + IF(NEW.Otsus = 'Paris', 1, 0)
+                WHERE Pildi_id = NEW.Pildi_id;
+            END IF;
+        END
+        ";
+
+        $mysqli->query($createTriggerSQL);
+    }
+} catch (mysqli_sql_exception $e) {
+    error_log("Error creating trigger update_tulemused_after_vote: " . $e->getMessage());
 }
 
 ?>

@@ -152,12 +152,15 @@ function submitGuess(choice) {
         })
           .then(res => res.text())
           .then(resp => {
-            if (resp === "OK" || resp === "Already started") {
-              sendGuess(choice);
-            } else {
-              alert("Viga hääletuse alustamisel.");
-            }
-          });
+  			if (resp === "OK") {
+    			alert(`Sinu hääl on salvestatud: ${choice}`);
+    			showImage(currentIndex);
+  			} else if (resp === "Already started") {
+    			sendGuess(choice);
+  			} else {
+    			alert("Viga hääletuse alustamisel.");
+  			}
+		});
       }
     });
 }
