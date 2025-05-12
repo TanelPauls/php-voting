@@ -33,10 +33,10 @@ while ($row = mysqli_fetch_assoc($result)) {
       <p id="vote-timer"></p>
 
       <div class="guess-info">
-        <p>Kõik kasutajate arvamused:</p>
-        <p>AI - 3 &nbsp;&nbsp;&nbsp; Päris - 7</p>
-        <p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
-      </div>
+  		<p>Kõik kasutajate arvamused:</p>
+  		<p id="vote-counts">AI - 0 &nbsp;&nbsp;&nbsp; Päris - 0</p>
+  		<p>Tegelikult on see pilt: <span class="correct-answer">Päris</span></p>
+	  </div>
     </div>
 
     <div id="nameModal" class="modal">
@@ -236,10 +236,27 @@ function confirmName() {
     });
 }
 
+function fetchResults() {
+  fetch("get_results.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageIndex: currentIndex })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data && typeof data.AI !== 'undefined') {
+        document.getElementById("vote-counts").textContent = `AI - ${data.AI}     Päris - ${data.Paris}`;
+      }
+    });
+}
 
 window.onload = function () {
   showImage(currentIndex);
+  setInterval(fetchResults, 5000); // refresh every 5 seconds
 };
+
+
+
 </script>
 
 </body>
