@@ -49,7 +49,7 @@ $sql = "
 CREATE TABLE IF NOT EXISTS PILDID (
     Pildi_id INT AUTO_INCREMENT PRIMARY KEY,
     URL VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
-    Oige_vastus ENUM('AI', 'Paris') DEFAULT NULL
+    Oige_vastus VARCHAR(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 ";
 
@@ -120,8 +120,8 @@ if (!$mysqli->query($sql)) {
 
 $sql = "
 INSERT IGNORE INTO PILDID (URL, Oige_vastus) VALUES
-('https://cdn.mos.cms.futurecdn.net/44kXT82VEHfqTG6uQ9kHVh-1200-80.jpg', 'Paris'),
-('https://c8.alamy.com/comp/RC0T0N/funny-caricature-of-mona-lisa-painting-RC0T0N.jpg', 'AI');
+('https://cdn.mos.cms.futurecdn.net/44kXT82VEHfqTG6uQ9kHVh-1200-80.jpg', 'Paris_asd'),
+('https://c8.alamy.com/comp/RC0T0N/funny-caricature-of-mona-lisa-painting-RC0T0N.jpg', 'Tommy_öäõü');
 ";
 
 if (!$mysqli->query($sql)) {

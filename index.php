@@ -89,7 +89,7 @@ function showImage(index) {
           correctAnswerEl.textContent = "Oota hääletuse lõpuni";
           updateTimerUI(300 - elapsed);
         } else {
-          correctAnswerEl.textContent = images[index].correct === "Paris" ? "Päris" : "AI";
+          correctAnswerEl.textContent = images[index].correct || "Oota hääletuse lõpuni";
           disableVoteButtons();
         }
       } else {
