@@ -118,6 +118,7 @@ function startVote() {
 
 
   function showImage(index) {
+	clearInterval(voteCountdown);
   imgElement.src = images[index].url;
 
   const voteMessage = document.getElementById("vote-message");
@@ -213,6 +214,7 @@ function updateTimer(secondsLeft) {
 
 
   window.onload = function () {
+	clearInterval(voteCountdown);
     showImage(currentIndex);
   };
 </script>
