@@ -17,6 +17,12 @@ if (!$mysqli->query($sql)) {
     error_log("Error deleting table: HAALETUS." . $mysqli->error);
 }
 
+$sql = "DROP PROCEDURE IF EXISTS CAST_VOTE;";
+
+if (!$mysqli->query($sql)) {
+    error_log("Error dropping procedure CAST_VOTE: " . $mysqli->error);
+}
+
 $sql = "
 DROP TABLE IF EXISTS TULEMUSED;
 ";
