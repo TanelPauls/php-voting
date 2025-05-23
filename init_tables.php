@@ -152,9 +152,28 @@ BEGIN
     DECLARE existing_H_alguse DATETIME;
     DECLARE minutes_diff INT;
     DECLARE now_time DATETIME;
+    DECLARE total_voters INT;
+    DECLARE max_vote_time DATETIME;
 
     SET now_time = NOW();
 
+    -- Get number of unique voters
+    SELECT COUNT(DISTINCT Haaletaja_id) INTO total_voters
+    FROM HAALETUS
+    WHERE Pildi_id = in_Pildi_id;
+
+    IF total_voters >= 11 THEN
+        SELECT MIN(H_alguse_aeg) INTO max_vote_time
+        FROM HAALETUS
+        WHERE Pildi_id = in_Pildi_id;
+
+        IF TIMESTAMPDIFF(MINUTE, max_vote_time, now_time) >= 5 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Voting closed for this image after 11 users and timeout.';
+        END IF;
+    END IF;
+
+    -- Check if user already voted
     SELECT id, H_alguse_aeg INTO existing_id, existing_H_alguse
     FROM HAALETUS
     WHERE Haaletaja_id = in_Haaletaja_id AND Pildi_id = in_Pildi_id
@@ -179,7 +198,7 @@ BEGIN
             VALUES (in_Haaletaja_id, in_Pildi_id, existing_H_alguse, now_time, in_Otsus);
         ELSE
             SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Voting period has expired. No changes allowed.';
+            SET MESSAGE_TEXT = 'Voting period expired for this user.';
         END IF;
     END IF;
 END
