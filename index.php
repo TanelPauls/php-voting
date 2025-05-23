@@ -17,10 +17,48 @@ while ($row = mysqli_fetch_assoc($result)) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kas on tegu AI või päris pildiga?</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .name-reminder {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      background-color: white;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .user-display {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f0f0f0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      z-index: 2;
+      font-weight: bold;
+      display: none;
+    }
+
+    .image-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
   <div class="image-wrapper">
+    <div id="nameReminder" class="name-reminder">
+      <button onclick="openModal()">Hääletamiseks vajalik eesnimi ja perenimi</button>
+    </div>
+    <p id="userDisplay" class="user-display"></p>
+
     <button class="nav-button left" onclick="prevImage()">⟨</button>
     <img src="" alt="Guess if this is AI or Real" class="guess-image" />
     <button class="nav-button right" onclick="nextImage()">⟩</button>
@@ -77,32 +115,30 @@ function showImage(index) {
   })
     .then(res => res.json())
     .then(data => {
-  const correctAnswerEl = document.querySelector(".correct-answer");
+      const correctAnswerEl = document.querySelector(".correct-answer");
 
-  if (data.status === "started") {
-    const startTime = new Date(data.start_time.replace(' ', 'T'));
-    const now = new Date();
-    let elapsed = (now - startTime) / 1000;
-    elapsed = Math.max(0, elapsed);
+      if (data.status === "started") {
+        const startTime = new Date(data.start_time.replace(' ', 'T'));
+        const now = new Date();
+        let elapsed = (now - startTime) / 1000;
+        elapsed = Math.max(0, elapsed);
 
-    if (elapsed < 300) {
-      correctAnswerEl.textContent = "Oota hääletuse lõpuni";
-      document.getElementById("ai-button").disabled = false;
-      document.getElementById("real-button").disabled = false;
-      updateTimerUI(300 - elapsed);
-    } else {
-      correctAnswerEl.textContent = images[index].correct || "Tulemus puudub";
-      disableVoteButtons();
-    }
-  } else {
-    // Voting hasn't started for this image → enable buttons
-    correctAnswerEl.textContent = "Oota hääletuse lõpuni";
-    document.getElementById("ai-button").disabled = false;
-    document.getElementById("real-button").disabled = false;
-    document.getElementById("vote-timer").textContent = "";
-  }
-});
-
+        if (elapsed < 300) {
+          correctAnswerEl.textContent = "Oota hääletuse lõpuni";
+          document.getElementById("ai-button").disabled = false;
+          document.getElementById("real-button").disabled = false;
+          updateTimerUI(300 - elapsed);
+        } else {
+          correctAnswerEl.textContent = images[index].correct || "Tulemus puudub";
+          disableVoteButtons();
+        }
+      } else {
+        correctAnswerEl.textContent = "Oota hääletuse lõpuni";
+        document.getElementById("ai-button").disabled = false;
+        document.getElementById("real-button").disabled = false;
+        document.getElementById("vote-timer").textContent = "";
+      }
+    });
 }
 
 function updateTimerUI(secondsLeft) {
@@ -236,7 +272,12 @@ function confirmName() {
     .then(response => {
       if (response === "OK") {
         voterName = `${eesnimi} ${perenimi}`;
+        localStorage.setItem("voterName", voterName);
         closeModal();
+        document.getElementById("nameReminder").style.display = "none";
+        const userDisplay = document.getElementById("userDisplay");
+        userDisplay.textContent = `Hääletate kasutajana "${voterName}"`;
+        userDisplay.style.display = "block";
         showImage(currentIndex);
         if (pendingVote) {
           submitGuess(pendingVote);
@@ -280,6 +321,15 @@ function startAutoUpdate() {
 }
 
 window.onload = function () {
+  const storedName = localStorage.getItem("voterName");
+  if (storedName) {
+    voterName = storedName;
+    document.getElementById("nameReminder").style.display = "none";
+    const userDisplay = document.getElementById("userDisplay");
+    userDisplay.textContent = `Hääletate kasutajana "${voterName}"`;
+    userDisplay.style.display = "block";
+  }
+
   showImage(currentIndex);
   fetchResults();
   startAutoUpdate();
