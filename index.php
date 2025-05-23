@@ -17,48 +17,19 @@ while ($row = mysqli_fetch_assoc($result)) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kas on tegu AI või päris pildiga?</title>
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    .name-reminder {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      background-color: white;
-      padding: 6px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    .user-display {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #f0f0f0;
-      padding: 6px 12px;
-      border-radius: 8px;
-      z-index: 2;
-      font-weight: bold;
-      display: none;
-    }
-
-    .image-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  </style>
 </head>
 <body>
 <div class="container">
-  <div class="image-wrapper">
-    <div id="nameReminder" class="name-reminder">
-      <button onclick="openModal()">Hääletamiseks vajalik eesnimi ja perenimi</button>
-    </div>
-    <p id="userDisplay" class="user-display"></p>
 
+  <div id="nameReminderWrapper" class="vote-message-row">
+    <button id="nameReminder" onclick="openModal()">Hääletamiseks vajalik eesnimi ja perenimi</button>
+    <p id="userDisplay" class="user-display" style="display: none;">
+      Hääletate kasutajana "<span id="usernameText"></span>"
+      <button id="logoutButton" onclick="logout()" class="logout-button">Logi välja</button>
+    </p>
+  </div>
+
+  <div class="image-wrapper">
     <button class="nav-button left" onclick="prevImage()">⟨</button>
     <img src="" alt="Guess if this is AI or Real" class="guess-image" />
     <button class="nav-button right" onclick="nextImage()">⟩</button>
@@ -86,7 +57,10 @@ while ($row = mysqli_fetch_assoc($result)) {
       <input type="text" id="eesnimi" placeholder="Eesnimi" />
       <input type="text" id="perenimi" placeholder="Perenimi" />
     </div>
-    <button onclick="confirmName()">Alusta hääletamist</button>
+    <div class="modal-buttons">
+      <button onclick="confirmName()">Alusta hääletamist</button>
+      <button onclick="closeModal()" class="cancel-button">Loobu</button>
+    </div>
   </div>
 </div>
 
@@ -275,9 +249,8 @@ function confirmName() {
         localStorage.setItem("voterName", voterName);
         closeModal();
         document.getElementById("nameReminder").style.display = "none";
-        const userDisplay = document.getElementById("userDisplay");
-        userDisplay.textContent = `Hääletate kasutajana "${voterName}"`;
-        userDisplay.style.display = "block";
+        document.getElementById("usernameText").textContent = voterName;
+        document.getElementById("userDisplay").style.display = "block";
         showImage(currentIndex);
         if (pendingVote) {
           submitGuess(pendingVote);
@@ -290,6 +263,14 @@ function confirmName() {
     .catch(() => {
       alert("Võrguviga kasutaja salvestamisel.");
     });
+}
+
+function logout() {
+  voterName = "";
+  localStorage.removeItem("voterName");
+  document.getElementById("userDisplay").style.display = "none";
+  document.getElementById("nameReminder").style.display = "inline-block";
+  showImage(currentIndex);
 }
 
 function fetchResults() {
@@ -325,9 +306,8 @@ window.onload = function () {
   if (storedName) {
     voterName = storedName;
     document.getElementById("nameReminder").style.display = "none";
-    const userDisplay = document.getElementById("userDisplay");
-    userDisplay.textContent = `Hääletate kasutajana "${voterName}"`;
-    userDisplay.style.display = "block";
+    document.getElementById("usernameText").textContent = voterName;
+    document.getElementById("userDisplay").style.display = "block";
   }
 
   showImage(currentIndex);

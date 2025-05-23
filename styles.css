@@ -25,7 +25,7 @@ body {
 .image-wrapper {
   position: relative;
   width: 100%;
-  flex: 1; /* Use all available vertical space */
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -96,7 +96,7 @@ body {
 }
 
 .modal {
-  display: none; /* Hidden by default */
+  display: none;
   position: fixed;
   z-index: 999;
   left: 0;
@@ -116,6 +116,7 @@ body {
   max-width: 400px;
   text-align: center;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
 .modal-fields {
@@ -132,18 +133,32 @@ body {
   border-radius: 8px;
 }
 
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
 .modal-content button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #0077cc;
-  color: white;
-  border: none;
   border-radius: 8px;
   cursor: pointer;
+  border: none;
+}
+
+.modal-content button:first-child {
+  background-color: #0077cc;
+  color: white;
+}
+
+.modal-content .cancel-button {
+  background-color: #ccc;
+  color: black;
 }
 
 .modal-content button:hover {
-  background-color: #005fa3;
+  opacity: 0.9;
 }
 
 .close {
@@ -153,34 +168,37 @@ body {
   font-size: 24px;
   cursor: pointer;
 }
-.vote-status {
-  margin-top: 10px;
-  text-align: center;
-}
-#start-vote-btn {
-  padding: 8px 16px;
-  font-size: 16px;
-  margin-top: 10px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
+
 .vote-message-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
-.vote-message-row #vote-message {
-  font-size: 2vh;
+.user-display {
+  font-weight: bold;
+  font-size: 16px;
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
 }
 
-#start-vote-btn {
-  flex-shrink: 0; /* prevent shrinking */
+.logout-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
 }
 
 .guess-button:disabled {
@@ -188,27 +206,4 @@ body {
   color: #eee;
   cursor: not-allowed;
   opacity: 0.6;
-}
-.name-reminder {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  background-color: white;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.user-display {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #f0f0f0;
-  padding: 6px 12px;
-  border-radius: 8px;
-  z-index: 2;
-  font-weight: bold;
 }
