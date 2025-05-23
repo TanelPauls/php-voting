@@ -156,24 +156,21 @@ BEGIN
     DECLARE minutes_diff INT;
     DECLARE now_time DATETIME;
     DECLARE total_voters INT;
-    DECLARE max_vote_time DATETIME;
 
     SET now_time = NOW();
 
-    -- Get number of unique voters
+    -- Check how many unique voters already voted on this image
     SELECT COUNT(DISTINCT Haaletaja_id) INTO total_voters
     FROM HAALETUS
     WHERE Pildi_id = in_Pildi_id;
 
-    IF total_voters >= 11 THEN
-        SELECT MIN(H_alguse_aeg) INTO max_vote_time
-        FROM HAALETUS
-        WHERE Pildi_id = in_Pildi_id;
-
-        IF TIMESTAMPDIFF(MINUTE, max_vote_time, now_time) >= 5 THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Voting closed for this image after 11 users and timeout.';
-        END IF;
+    -- Block new voters if already 11 unique have voted and this one is not among them
+    IF total_voters >= 11 AND NOT EXISTS (
+        SELECT 1 FROM HAALETUS
+        WHERE Haaletaja_id = in_Haaletaja_id AND Pildi_id = in_Pildi_id
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Voting limit reached. No new voters allowed.';
     END IF;
 
     -- Check if user already voted
