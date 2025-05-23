@@ -22,10 +22,10 @@ while ($row = mysqli_fetch_assoc($result)) {
 <div class="container">
 
   <div id="nameReminderWrapper" class="vote-message-row">
-    <button id="nameReminder" onclick="openModal()">Hääletamiseks vajalik eesnimi ja perenimi</button>
+    <button id="nameReminder" class="guess-button" onclick="openModal()">Hääletamiseks vajalik eesnimi ja perenimi</button>
     <p id="userDisplay" class="user-display" style="display: none;">
       Hääletate kasutajana "<span id="usernameText"></span>"
-      <button id="logoutButton" onclick="logout()" class="logout-button">Logi välja</button>
+      <button id="logoutButton" class="guess-button small-button" onclick="logout()">Logi välja</button>
     </p>
   </div>
 
