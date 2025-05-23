@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-/*
+
 $sql = "
 DROP TABLE IF EXISTS LOGI;
 ";
@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS PILDID;
 if (!$mysqli->query($sql)) {
     error_log("Error deleting table: PILDID." . $mysqli->error);
 }
-*/
+
 
 
 $sql = "
@@ -59,9 +59,12 @@ $sql = "
 CREATE TABLE IF NOT EXISTS HAALETAJAD (
     Haaletaja_id INT AUTO_INCREMENT PRIMARY KEY,
     Eesnimi VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-    Perenimi VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+    Perenimi VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    UNIQUE (Eesnimi, Perenimi)
 ) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 ";
+
+
 
 if (!$mysqli->query($sql)) {
     error_log("Error creating HAALETAJAD table: " . $mysqli->error);
