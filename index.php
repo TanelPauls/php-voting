@@ -181,17 +181,17 @@ function submitGuess(choice) {
         })
           .then(res => res.text())
           .then(resp => {
-    if (resp === "OK") {
-        alert(`Sinu hääl on salvestatud: ${choice}`);
-        showImage(currentIndex);
-    } else if (resp === "Already started") {
-        sendGuess(choice);
-    } else if (resp.includes("Voting limit")) {
-        alert("Hääletus on lõppenud. Maksimum hääletajate arv on 11.");
-    } else {
-        alert("Viga hääletuse alustamisel.");
-    }
-});
+            if (resp === "OK") {
+              alert(`Sinu hääl on salvestatud: ${choice}`);
+              showImage(currentIndex);
+            } else if (resp === "Already started") {
+              sendGuess(choice);
+            } else if (resp.includes("Hääletus lõppenud") || resp.includes("maksimaalselt")) {
+              alert(resp);
+            } else {
+              alert("Viga hääletuse alustamisel.");
+            }
+          });
       }
     });
 }

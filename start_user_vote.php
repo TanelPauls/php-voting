@@ -42,10 +42,14 @@ try {
     $stmt->execute();
     echo "OK";
 } catch (mysqli_sql_exception $e) {
-    if (strpos($e->getMessage(), 'Voting period has expired') !== false) {
+    $errorMessage = $e->getMessage();
+
+    if (strpos($errorMessage, 'Voting period expired') !== false) {
         echo "TOO_LATE";
+    } elseif (strpos($errorMessage, 'Hääletus lõppenud') !== false) {
+        echo $errorMessage;
     } else {
-        error_log("CAST_VOTE error: " . $e->getMessage());
+        error_log("CAST_VOTE error: " . $errorMessage);
         http_response_code(500);
         echo "DB error";
     }
