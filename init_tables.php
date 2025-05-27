@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-
+/*
 $sql = "
 DROP TABLE IF EXISTS LOGI;
 ";
@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS PILDID;
 if (!$mysqli->query($sql)) {
     error_log("Error deleting table: PILDID." . $mysqli->error);
 }
-
+*/
 
 
 $sql = "
