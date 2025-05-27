@@ -171,7 +171,7 @@ BEGIN
     WHERE Pildi_id = in_Pildi_id;
 
     -- Block new voters if already 11 unique have voted and this one is not among them
-    IF total_voters >= 3 AND NOT EXISTS (
+    IF total_voters >= 11 AND NOT EXISTS (
         SELECT 1 FROM HAALETUS
         WHERE Haaletaja_id = in_Haaletaja_id AND Pildi_id = in_Pildi_id
     ) THEN
